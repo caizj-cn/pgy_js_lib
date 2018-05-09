@@ -1,5 +1,5 @@
 # jslib
-1.CryptoJS
-var str = '111111';
-var CryptoJS = require('CryptoJS');
-var md5 = CryptoJS.MD5(str).toString();
+1.CryptoJS</br>
+var str = '111111';</br>
+var CryptoJS = require('CryptoJS');</br>
+var md5 = CryptoJS.MD5(str).toString();</br>
