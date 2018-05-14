@@ -1,10 +1,10 @@
-//npm install xlsx -save
+// 安装 npm install xlsx -save
 
 var xl =require('xlsx');
 var fs = require("fs");
 var path = require('path');
 
-//解析需要遍历的文件夹，我这以E盘根目录为例
+//解析需要遍历的文件夹
 var filePath = path.resolve('./dir');
 
 //调用文件遍历方法
@@ -32,7 +32,6 @@ function fileDisplay(filePath){
                         var isFile = stats.isFile();//是文件
                         var isDir = stats.isDirectory();//是文件夹
                         if(isFile){
-                            //console.log(filedir);
                             readQQ(filedir);
                         }
                         if(isDir){
@@ -46,13 +45,19 @@ function fileDisplay(filePath){
 }
 
 function readQQ(xlsfilename){
+    // 读取xls文件
     var workbook =  xl.readFile(xlsfilename);
+    
+    // 获取表格名称
     const sheetNames = workbook.SheetNames;
 
+    // 获取单张表格
     const worksheet = workbook.Sheets[sheetNames[0]];
 
+    // 获取文本文件路劲
     var txtfilename = getExt(xlsfilename);
 
+    // 读取excel数据到txt
     for(let row = 3, cell = 'C' + row; worksheet[cell] != undefined; row++, cell = 'C' + row){
         let QQ = worksheet[cell].v;
 
@@ -72,9 +77,11 @@ function readQQ(xlsfilename){
         });
     }
 
+    // 状态更新
     console.log(xlsfilename + ' write!');
 }
 
+// 获取excel文件对应的txt路径
 function getExt(dir){
     let index = dir.indexOf('.');
     var ndir = dir.substring(0, index) + '.txt';
