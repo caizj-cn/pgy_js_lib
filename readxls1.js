@@ -1,5 +1,3 @@
-// 安装 npm install xlsx -save
-
 var xl =require('xlsx');
 var fs = require("fs");
 var path = require('path');
@@ -33,7 +31,7 @@ function fileDisplay(filePath){
                         var isDir = stats.isDirectory();//是文件夹
                         if(isFile){
                             let ext = filedir.substring(filedir.indexOf('.'), filedir.length);
-                            if(ext == '.xls'){
+                            if(ext == '.xls' || ext == '.xlsx'){
                                 readQQ(filedir);
                             }                            
                         }
@@ -61,9 +59,10 @@ function readQQ(xlsfilename){
         // 获取文本文件路劲
         var txtfilename = getExt(xlsfilename, sheetNames[i]);
 
-        var keyRegex = '^[A-Z][0-9]$';
+        var keyRegex = '^[A-Z]';
         for(name in worksheet) {
             
+            console.log('###############' + name);
             if(!name.match(keyRegex)){
                 continue;
             }
