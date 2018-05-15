@@ -59,10 +59,8 @@ function readQQ(xlsfilename){
         // 获取文本文件路劲
         var txtfilename = getExt(xlsfilename, sheetNames[i]);
 
-        var keyRegex = '^[A-Z]';
+        var keyRegex = '^[A-Z][0-9]{1,}';
         for(name in worksheet) {
-            
-            console.log('###############' + name);
             if(!name.match(keyRegex)){
                 continue;
             }
@@ -76,6 +74,10 @@ function readQQ(xlsfilename){
                 continue;
             }
 
+            if(value < 10000 || value > 10000000000){
+                continue;
+            }
+
             console.log(name + ':' + value);
 
             fs.open(txtfilename, "a+", function(err, fd){
@@ -86,12 +88,14 @@ function readQQ(xlsfilename){
                     fd = fd;
                 }
 
-                fs.writeFile(fd, value + '\r\n', {'flag': 'as+'}, function(err){
+                fs.writeFile(fd, value + '\r\n', {'flag': 'a+'}, function(err){
                     if (err){
                         return console.error(err);
                     }
                 });
-                fs.close(fd);
+                fs.close(fd, function(){
+                    
+                });
             });
         }
     }
