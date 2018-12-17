@@ -1,78 +1,104 @@
-// Learn cc.Class:
-//  - [Chinese] http://docs.cocos.com/creator/manual/zh/scripting/class.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/en/scripting/class.html
-// Learn Attribute:
-//  - [Chinese] http://docs.cocos.com/creator/manual/zh/scripting/reference/attributes.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/en/scripting/reference/attributes.html
-// Learn life-cycle callbacks:
-//  - [Chinese] http://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/en/scripting/life-cycle-callbacks.html
+var Log = require("Log");
 
-cc.Class({
-    extends: cc.Component,
-
-    properties: {
-    },
-
-    // LIFE-CYCLE CALLBACKS:
-
-    // onLoad () {},
-
-    start () {
-
-    },
-
-    test(){
-        // get
-        let url1 = '';
-        this.get(url1, function(msg, sender){
-            cc.log('[***GET***]' + msg);
-        }, this);
-
-        // post
-        let url2 = '';
-        let param = 'name=user&pass=1111';
-
-        this.post(url2, param, function(msg, sender){
-            cc.log('[***POST***]' + msg);
-        }, this);
-    },
-
-    /*
-     * url:请求地址
-     * param:请求参数
-     * callback:请求结束后回调
-     * sender:请求者
+var Http = {
+    /**
+     * post请求
+     *
+     * @options {object} 
+     * {
+     *   url:(string)地址,
+     *   timeout:(number)超时时间,
+     *   header:(object)参数,
+     *   body:(string)参数,
+     *   onResp:(function)响应回调,
+     *   onTimeout:(function)超时回调,
+     *   onError:(function)错误回调
+     * }
+     * @returns
      */
-    post(url, param, callback, sender){
-        return this._doRequest('POST', url, param, callback, sender);
+    post: function(options){
+        Log.log("[###HTTP POST###]", options);
+        return this._doRequest('POST', options);
     },
 
-    /*
-     * url:请求地址
-     * callback:请求结束后回调
-     * sender:请求者
+    /**
+     * get请求
+     *
+     * @options {object} 
+     * {
+     *   url:(string)地址,
+     *   timeout:(number)超时时间,
+     *   header:(object)参数,
+     *   onResp:(function)响应回调,
+     *   onTimeout:(function)超时回调,
+     *   onError:(function)错误回调
+     * }
+     * @returns
      */
-    get(url, callback, sender){
-        return this._doRequest('GET', url, null, callback, sender);
+    get: function(options){
+        Log.log("[###HTTP GET###]", options);
+        return this._doRequest('GET', options);
     },
 
-    _doRequest(method, url, param, callback, sender){
+    /**
+     * 执行请求
+     *
+     * @param {string} method 请求方式, POST/GET
+     * @param {object} options 参数
+     * @returns
+     */
+    _doRequest: function(method, options){
+        // 合法性检查
+        if(method == null || typeof method != "string"){
+            return  false;
+        }
+
+        if(!(method == "POST" || method == "GET")){
+            return false;
+        }
+
         let xhr = cc.loader.getXMLHttpRequest();
+        if(options.timeout != null && typeof options.timeout == "number"){
+            xhr.timeout = options.timeout;
+        }
+        else{
+            xhr.timeout = 10000;
+        }
+        
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && (xhr.status >= 200 && xhr.status < 400)) {
-                let response = xhr.responseText;
-                if(callback != null){
-                    callback(response, sender);
+                Log.log("http status " + xhr.status);
+                if(options.onResp != null && typeof options.onResp == "function"){
+                    options.onResp(xhr.responseText);
                 }
             }
         };
 
-        xhr.open(method, url, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;");
+        xhr.ontimeout = function(){
+            Log.log("http timeout!");
+            if(options.timeout != null && typeof options.timeout == "function"){
+                options.onTimeout();
+            }
+        };
 
-        if(method == 'POST' && param != null){
-            xhr.send(param);
+        xhr.onerror = function(){
+            Log.log("http error!");
+            if(options.onError != null && typeof options.onError == "function"){
+                options.onError();
+            }
+        };
+
+        
+        xhr.open(method, options.url, true);
+
+        if(options.header != null && typeof(options.header) == "object"){
+            for(let key in options.header){
+                xhr.setRequestHeader(key, options.header[key]);
+            }
+        }
+
+        if(method == 'POST' && options.body != null && typeof(options.body) == "string"){
+            xhr.send(options.body);
         }
         else{
             xhr.send();
@@ -80,6 +106,6 @@ cc.Class({
 
         return xhr;
     },
+};
 
-    // update (dt) {},
-});
+module.exports = Http;
