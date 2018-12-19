@@ -1,0 +1,21 @@
+{
+	"server":
+	{
+		"ip":"127.0.0.1",
+		"port":22,
+		"name":"root",
+		"password":"root"
+	},
+	"project":
+	[
+		{
+			"root_path": "E:/work/test",
+			"api_url": "",
+			"local_path": "/build/web-mobile/",
+			"remote_path": "/home/software/nginx/html/test/",
+			"webOrientation": "portrait",
+			"startScene": "LoginScene",
+			"debug": true
+		}
+	]
+}
