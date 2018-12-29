@@ -1,16 +1,15 @@
-var Log = {
-    log: function(msg, subst){
-        (subst == null)? cc.log(msg): cc.log(msg, subst);
+const Log = {
+    log(msg, ...subst){
+        cc.log(msg, subst);
     },
 
-
-    warn: function(msg, subst){
-        (subst == null)? cc.warn(msg): cc.warn(msg, subst);
+    warn(msg, ...subst){
+        c.warn(msg, subst)
     },
 
-    error: function(msg, subst){
-        (subst == null)? cc.error(msg): cc.error(msg, subst);
+    error(msg, ...subst){
+        cc.error(msg, subst)
     },
 };
 
-module.exports = Log;
+export default Log;

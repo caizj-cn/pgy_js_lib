@@ -1,22 +1,18 @@
-var CryptoJS = require("CryptoJS");
-var Log = require("Log");
+import CryptoJS from 'CryptoJS';
+import Log from 'Log';
 
-var Utils = {
-
-    MD5: function(data){
-        data = data || "";
+const Utils = {
+    MD5(data = ''){
         return CryptoJS.MD5(data).toString();
     },
 
-    AESEncrypt: function(data, key, iv){
-        data = data || "";
+    AESEncrypt(data = '', key, iv){
         let cryptokey = CryptoJS.enc.Utf8.parse(key);
         let cryptoiv  = CryptoJS.enc.Utf8.parse(iv);
         return CryptoJS.AES.encrypt(data, cryptokey, {iv: cryptoiv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.ZeroPadding}).toString();
     },
 
-    AESDecrypt: function(data, key, iv){
-        data = data || "";
+    AESDecrypt(data = '', key, iv){
         let cryptokey  = CryptoJS.enc.Utf8.parse(key);
         let cryptoiv   = CryptoJS.enc.Utf8.parse(iv);
         return CryptoJS.AES.decrypt(data, cryptokey, {iv: cryptoiv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.ZeroPadding}).toString(CryptoJS.enc.Utf8);
@@ -29,7 +25,7 @@ var Utils = {
      * @param {number} max - 最大整数
      * @returns [min, max]之间随机整数
      */
-    getRandomNum: function(min, max){
+    getRandomNum(min, max){
         return Math.floor(Math.random()*(max - min + 1) + min);
     },
 
@@ -40,7 +36,7 @@ var Utils = {
      * @param {number} length 保留位数
      * @returns 长度为length的数字
      */
-    PrefixInteger: function(num, length) {  
+    PrefixInteger(num, length) {  
         return (Array(length).join('0') + num).slice(-length);
     },
 
@@ -50,13 +46,14 @@ var Utils = {
      * @param {number} timestamp
      * @returns YYYY/MM/DD
      */
-    timestamp2YMD: function(timestamp){    
+    timestamp2YMD(timestamp){    
         let date = new Date(timestamp);
-        let str = this.PrefixInteger(date.getFullYear(), 4) + "/";
-        str = str + this.PrefixInteger((date.getMonth() + 1), 2) + "/";
-        str = str + this.PrefixInteger(date.getDate(), 2);
 
-        return str;
+        let year = this.PrefixInteger(date.getFullYear(), 4);
+        let month = this.PrefixInteger((date.getMonth() + 1), 2);
+        let day = this.PrefixInteger(date.getDate(), 2);
+
+        return `${year}/${month}/${day}`;
     },
 
     /**
@@ -64,7 +61,7 @@ var Utils = {
      *
      * @returns
      */
-    getCurrentTime: function () {
+    getCurrentTime() {
         return parseInt(new Date().getTime() / 1000);
     },
 
@@ -73,7 +70,7 @@ var Utils = {
      *
      * @returns
      */
-    getCurrentMT: function () {
+    getCurrentMT() {
         return new Date().getTime();
     },
 
@@ -81,18 +78,39 @@ var Utils = {
      * 时间戳转换成显示格式
      *
      * @param {number} timestamp
-     * @returns YYYY/MM/DD hh:mm:ss
+     * @returns YYYY-MM-DD hh:mm:ss
      */
-    timestamp2YMDHMS: function(timestamp){    
+    timestamp2YMDHMS(timestamp){    
         let date = new Date(timestamp);
-        let str = this.PrefixInteger(date.getFullYear(), 4) + "-";
-        str = str + this.PrefixInteger((date.getMonth() + 1), 2) + "-";
-        str = str + this.PrefixInteger(date.getDate(), 2) + " ";
-        str = str + this.PrefixInteger(date.getHours(), 2) + ":";
-        str = str + this.PrefixInteger(date.getMinutes(), 2) + ":";
-        str = str + this.PrefixInteger(date.getSeconds(), 2);
+        let year = this.PrefixInteger(date.getFullYear(), 4);
+        let month = this.PrefixInteger((date.getMonth() + 1), 2);
+        let day = this.PrefixInteger(date.getDate(), 2);
+        let hour = this.PrefixInteger(date.getHours(), 2);
+        let minute = this.PrefixInteger(date.getMinutes(), 2);
+        let second = this.PrefixInteger(date.getSeconds(), 2);
 
-        return str;
+        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    },
+
+    /**
+     * 秒转换成时分秒显示
+     *
+     * @param {number} time
+     * @returns dd hh:mm:ss
+     */
+    second2HMS(time){
+        let day = this.PrefixInteger(Math.floor(time / (3600 * 24)), 2);
+        time = time % (3600 * 24);
+        
+        let hour = this.PrefixInteger(Math.floor(time / 3600), 2);
+        time = time % 3600;
+        
+        let minute = this.PrefixInteger(Math.floor(time / 60),2);
+        time = time % 60;
+        
+        let second = this.PrefixInteger(time, 2);
+
+        return `${day}天 ${hour}时 ${minute}分 ${second}秒`;
     },
 
     /**
@@ -101,19 +119,14 @@ var Utils = {
      * @param {object} 参数
      * @returns
      */
-    object2SortQuery: function(obj){
-        if(obj == null || typeof obj != "object"){
-            Log.error("obj error!");
-            return "";
-        }
-
+    object2SortQuery(obj = {}){
         let keys = Object.keys(obj).sort();
 
-        let str = "";
+        let str = '';
         for(let i = 0; i < keys.length; i++){
             str = str + keys[i] + "=" + obj[keys[i]];
             if(i != keys.length - 1){
-                str += "&";
+                str += '&';
             }
         }
 
@@ -127,14 +140,14 @@ var Utils = {
      * @returns
      */
     
-    queryToObject: function(query){
+    queryToObject(query = ''){
         let obj = {};
-        if(query == ""){
+        if(query == ''){
             return obj;
         }
-        let querys = query.split("&");
+        let querys = query.split('&');
         for(let i = 0; i < querys.length; i++){
-            let str = querys[i].split("=");
+            let str = querys[i].split('=');
             obj[str[0]] = str[1];
         }
         return obj;
@@ -145,10 +158,9 @@ var Utils = {
      *
      * @returns
      */
-    getQuery: function()
-    {
+    getQuery() {
         var query = window.location.search.substring(1);
-        return (query != null)? query: "";
+        return (query != null)? query: '';
     },
 
     /**
@@ -159,21 +171,17 @@ var Utils = {
      * @param {number} zIndex 层级
      * @param {function(cc.Node)} callback 添加完回调
      */
-    addPrefab: function(name, prefab, zIndex, callback){
-        if(name == null || typeof name != "string"){
+    addPrefab(name = '', prefab = '', zIndex = 100, callback){
+        if(name == ''){
             return false;
         }
 
-        if(prefab == null || typeof prefab != "string"){
-            return false;
-        }
-
-        if(zIndex == null || typeof zIndex != "number"){
-            Log.error(name + " exist!");
+        if(prefab == ''){
             return false;
         }
 
         if(cc.director.getScene().getChildByName(name) != null){
+            Log.error(`${name} exist!`);
             return false;
         }
 
@@ -198,11 +206,7 @@ var Utils = {
      *
      * @param {string} name 节点名称
      */
-    removeChildByName: function(name){
-        if(typeof name != "string"){
-            return false;
-        }
-
+    removeChildByName(name = ''){
         let child = cc.director.getScene().getChildByName(name);
         if(child != null){
             child.removeFromParent();
@@ -213,4 +217,4 @@ var Utils = {
     },
 };
 
-module.exports = Utils;
+export default Utils;

@@ -1,6 +1,6 @@
-var Log = require("Log");
+import Log from 'Log';
 
-var Http = {
+const Http = {
     /**
      * post请求
      *
@@ -16,8 +16,8 @@ var Http = {
      * }
      * @returns
      */
-    post: function(options){
-        Log.log("[###HTTP POST###]", options);
+    post(options){
+        Log.log('[###HTTP POST###]', options);
         return this._doRequest('POST', options);
     },
 
@@ -35,8 +35,8 @@ var Http = {
      * }
      * @returns
      */
-    get: function(options){
-        Log.log("[###HTTP GET###]", options);
+    get(options){
+        Log.log('[###HTTP GET###]', options);
         return this._doRequest('GET', options);
     },
 
@@ -47,43 +47,33 @@ var Http = {
      * @param {object} options 参数
      * @returns
      */
-    _doRequest: function(method, options){
-        // 合法性检查
-        if(method == null || typeof method != "string"){
-            return  false;
-        }
-
-        if(!(method == "POST" || method == "GET")){
-            return false;
-        }
-
-        let xhr = cc.loader.getXMLHttpRequest();
-        if(options.timeout != null && typeof options.timeout == "number"){
-            xhr.timeout = options.timeout;
-        }
-        else{
-            xhr.timeout = 10000;
-        }
+    _doRequest(method = 'GET', options = {}){
         
+        let xhr = cc.loader.getXMLHttpRequest();
+        xhr.timeout = (options.timeout != null)? options.timeout: 10000;
+        
+        // 返回
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && (xhr.status >= 200 && xhr.status < 400)) {
-                Log.log("http status " + xhr.status);
-                if(options.onResp != null && typeof options.onResp == "function"){
+                Log.log(xhr.responseText, options);
+                if(options.onResp != null && typeof options.onResp == 'function'){
                     options.onResp(xhr.responseText);
                 }
             }
         };
 
+        // 超时
         xhr.ontimeout = function(){
-            Log.log("http timeout!");
-            if(options.timeout != null && typeof options.timeout == "function"){
+            Log.log('http timeout!');
+            if(options.timeout != null && typeof options.timeout == 'function'){
                 options.onTimeout();
             }
         };
 
+        // 异常
         xhr.onerror = function(){
-            Log.log("http error!");
-            if(options.onError != null && typeof options.onError == "function"){
+            Log.log('http error!');
+            if(options.onError != null && typeof options.onError == 'function'){
                 options.onError();
             }
         };
@@ -91,13 +81,13 @@ var Http = {
         
         xhr.open(method, options.url, true);
 
-        if(options.header != null && typeof(options.header) == "object"){
+        if(options.header != null && typeof(options.header) == 'object'){
             for(let key in options.header){
                 xhr.setRequestHeader(key, options.header[key]);
             }
         }
 
-        if(method == 'POST' && options.body != null && typeof(options.body) == "string"){
+        if(method == 'POST' && options.body != null && typeof(options.body) == 'string'){
             xhr.send(options.body);
         }
         else{
@@ -108,4 +98,4 @@ var Http = {
     },
 };
 
-module.exports = Http;
+export default Http;
